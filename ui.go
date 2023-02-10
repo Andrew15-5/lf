@@ -261,7 +261,7 @@ func (win *win) printReg(screen tcell.Screen, reg *reg) {
 
 	if reg.loading {
 		st = st.Reverse(true)
-		win.print(screen, 2, 0, st, "loading...")
+		// win.print(screen, 2, 0, st, "loading...")
 		return
 	}
 
@@ -354,7 +354,7 @@ func (win *win) printDir(screen tcell.Screen, dir *dir, context *dirContext, dir
 		return
 	}
 	if (dir.loading && len(dir.files) == 0) || (dirStyle.previewing && dir.loading && gOpts.dirpreviews) {
-		win.print(screen, 2, 0, messageStyle, "loading...")
+		// win.print(screen, 2, 0, messageStyle, "loading...")
 		return
 	}
 
