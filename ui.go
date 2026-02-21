@@ -301,11 +301,11 @@ func fileInfo(f *file, d *dir, userWidth, groupWidth, customWidth int) (string, 
 			} else {
 				switch {
 				case f.dirSize != nil:
-					fmt.Fprintf(&info, " %5s", humanize(*f.dirSize))
+					fmt.Fprintf(&info, " %11s", humanize(*f.dirSize))
 				case f.IsDir():
 					info.WriteString("     -")
 				default:
-					fmt.Fprintf(&info, " %5s", humanize(uint64(f.Size())))
+					fmt.Fprintf(&info, " %11s", humanize(uint64(f.Size())))
 				}
 			}
 		case "time":

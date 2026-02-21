@@ -245,7 +245,7 @@ func readPairs(r io.Reader) ([][]string, error) {
 
 // humanize converts a size in bytes to a human-readable form using
 // prefixes for either binary (1 KiB = 1024 B) or decimal (1 KB = 1000 B)
-// multiples. The output should be no more than 5 characters long.
+// multiples. The output should be no more than 11 characters long.
 func humanize(size uint64) string {
 	var base uint64 = 1024
 	if gOpts.sizeunits == "decimal" {
@@ -253,41 +253,51 @@ func humanize(size uint64) string {
 	}
 
 	if size < base {
-		return fmt.Sprintf("%dB", size)
+		return fmt.Sprintf("%d B", size)
 	}
 
 	// Note: due to [fs.FileInfo.Size] being `int64`, the maximum
 	// possible representable value would be 8 EiB or 9.2 EB.
-	prefixes := []string{
-		"K", // kibi (2^10) or kilo (10^3)
-		"M", // mebi (2^20) or mega (10^6)
-		"G", // gibi (2^30) or giga (10^9)
-		"T", // tebi (2^40) or tera (10^2)
-		"P", // pebi (2^50) or peta (10^15)
-		"E", // exbi (2^60) or exa (10^18)
-		"Z", // zebi (2^70) or zetta (10^21)
-		"Y", // yobi (2^80) or yotta (10^24)
-		"R", // robi (2^90) or ronna (10^27)
-		"Q", // quebi (2^100) or quetta (10^30)
+	binaryUnits := []string{
+		"KiB", // kibi (2^10)
+		"MiB", // mebi (2^20)
+		"GiB", // gibi (2^30)
+		"TiB", // tebi (2^40)
+		"PiB", // pebi (2^50)
+		"EiB", // exbi (2^60)
+		"ZiB", // zebi (2^70)
+		"YiB", // yobi (2^80)
+		"RiB", // robi (2^90)
+		"QiB", // quebi (2^100)
+	}
+	decimalUnits := []string{
+		"kB", // kilo (10^3)
+		"MB", // mega (10^6)
+		"GB", // giga (10^9)
+		"TB", // tera (10^2)
+		"PB", // peta (10^15)
+		"EB", // exa (10^18)
+		"ZB", // zetta (10^21)
+		"YB", // yotta (10^24)
+		"RB", // ronna (10^27)
+		"QB", // quetta (10^30)
+	}
+	units := binaryUnits
+	if gOpts.sizeunits == "decimal" {
+		units = decimalUnits
 	}
 
 	curr := big.NewRat(int64(size), int64(base))
 
-	for _, prefix := range prefixes {
-		// if curr < 99.95 then round to 1 decimal place
-		if curr.Cmp(big.NewRat(9995, 100)) < 0 {
-			return fmt.Sprintf("%s%s", curr.FloatString(1), prefix)
-		}
-
-		// if curr < base-0.5 then round to the nearest integer
-		if curr.Cmp(new(big.Rat).Sub(big.NewRat(int64(base), 1), big.NewRat(1, 2))) < 0 {
-			return fmt.Sprintf("%s%s", curr.FloatString(0), prefix)
+	for _, prefix := range units {
+		if curr.Cmp(new(big.Rat).Sub(big.NewRat(int64(base), 1), big.NewRat(5, 1000))) < 0 {
+			return fmt.Sprintf("%s %s", curr.FloatString(2), prefix)
 		}
 
 		curr.Quo(curr, big.NewRat(int64(base), 1))
 	}
 
-	return fmt.Sprintf("+999%s", prefixes[len(prefixes)-1])
+	return fmt.Sprintf("+999 %s", units[len(units)-1])
 }
 
 // permString returns an ls(1)-style string representation of the given file
